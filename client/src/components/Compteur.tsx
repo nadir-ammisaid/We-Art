@@ -1,14 +1,13 @@
-import "./Compteur.css";
 import { useFavorites } from "../contexts/FavoritesContext";
 
 export default function Compteur() {
   const { favorites } = useFavorites();
 
   return (
-    <div className="compteur">
-      <h2>
+    <div className="compteur-wrapper">
+      <p className="compteur-text">
         You liked {favorites.length} artwork{favorites.length > 1 ? "s" : ""}
-      </h2>
+      </p>
     </div>
   );
 }

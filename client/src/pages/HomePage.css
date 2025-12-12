@@ -1,46 +1,388 @@
-.searchcarcl {
-  display: flex;
-  flex-direction: row-reverse;
-  margin-top: 1em;
-  justify-content: right;
-  width: 100%;
-  height: auto;
-}
+/* HomePage Styles - Cohérent avec la Navbar */
 
 .sbhomepage {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.cardart {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.compteur {
-  text-align: center;
-}
-
+/* ========================================
+   SEARCH BAR - Style button-54
+======================================== */
 .searchcarcl {
+  max-width: 90%;
+  width: 100%;
+  margin: 0 auto 2rem;
+  display: flex;
   justify-content: center;
-  padding-right: 1.5em;
-}
-.cardart p {
-  font-size: x-large;
-  text-align: center;
-  font-family: monospace;
+  padding: 0 1rem;
 }
 
-@media (min-width: 400px) {
+.searchBar {
+  width: 100%;
+  max-width: 600px;
+}
+
+.searchBar input {
+  width: 100%;
+  font-family: "Lucida Sans", sans-serif;
+  background-color: #ffcd29;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #000;
+  border: 3px solid #000;
+  padding: 0.75em 1em;
+  box-shadow: 1px 1px 0 0, 2px 2px 0 0, 3px 3px 0 0, 4px 4px 0 0, 5px 5px 0 0;
+  transition: all 0.2s ease;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.searchBar input::placeholder {
+  color: #333;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.searchBar input:focus {
+  outline: none;
+  background-color: #2997fd;
+  box-shadow: 2px 2px 0 0, 4px 4px 0 0, 6px 6px 0 0;
+  transform: translate(-2px, -2px);
+}
+
+.searchBar input:active {
+  box-shadow: 0px 0px 0px 0px;
+  transform: translate(5px, 5px);
+}
+
+/* ========================================
+   COMPTEUR - Compact
+======================================== */
+.compteur-wrapper {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #ffcd29;
+  border: 3px solid #000;
+  border-radius: 0;
+  max-width: 400px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 2px 2px 0 0 #000;
+  box-sizing: border-box;
+}
+
+.compteur-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #000;
+  font-weight: 700;
+  font-family: "Lucida Sans", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ========================================
+   BANNERS
+======================================== */
+.error-banner,
+.loading-banner {
+  max-width: 90%;
+  margin: 0 auto 2rem;
+  padding: 1.5rem;
+  text-align: center;
+  border: 3px solid #000;
+  box-shadow: 3px 3px 0 0 #000;
+  animation: slideDown 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+.error-banner {
+  background-color: #ff6b6b;
+  color: #000;
+}
+
+.error-banner p {
+  margin: 0;
+  font-weight: 700;
+  font-family: "Lucida Sans", sans-serif;
+  text-transform: uppercase;
+}
+
+.loading-banner {
+  background-color: #ffcd29;
+}
+
+.loading-banner p {
+  margin: 0.5rem 0 0;
+  color: #000;
+  font-weight: 700;
+  font-family: "Lucida Sans", sans-serif;
+  text-transform: uppercase;
+}
+
+/* Loader Animation */
+.loader {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  border: 4px solid #000;
+  border-top: 4px solid #2997fd;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   CARDS GRID
+======================================== */
+.cardart {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ========================================
+   RESULTS FOOTER - Style button-54
+======================================== */
+.results-footer {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #ffcd29;
+  border: 3px solid #000;
+  margin-top: 1rem;
+  box-shadow: 3px 3px 0 0 #000;
+  box-sizing: border-box;
+}
+
+.results-footer p {
+  margin: 0;
+  font-size: 1rem;
+  color: #000;
+  font-weight: 700;
+  font-family: "Lucida Sans", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.results-footer strong {
+  color: #2997fd;
+  font-weight: 700;
+}
+
+/* ========================================
+   EMPTY STATE
+======================================== */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #ffcd29;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0 0 #000;
+  box-sizing: border-box;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #000;
+  margin: 0 0 0.5rem;
+  font-family: "Lucida Sans", sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: #000;
+  margin: 0;
+  font-family: "Lucida Sans", sans-serif;
+}
+
+/* ========================================
+   RESPONSIVE - TABLET
+======================================== */
+@media (max-width: 1024px) {
   .searchcarcl {
-    display: flex;
-    flex-direction: row-reverse;
-    margin-right: 1.5em;
-    justify-content: right;
-    width: 100%;
-    height: auto;
+    max-width: 95%;
+  }
+
+  .compteur {
+    max-width: 95%;
+  }
+
+  .cardart {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+======================================== */
+@media (max-width: 768px) {
+  .sbhomepage {
+    padding: 1rem 0.5rem;
+  }
+
+  .searchcarcl {
+    max-width: 95%;
+    padding: 0 0.5rem;
+  }
+
+  .searchBar input {
+    font-size: 0.9rem;
+    padding: 0.6em 0.8em;
+  }
+
+  .compteur-wrapper {
+    padding: 0.6rem 0.8rem;
+    max-width: fit-content;
+    box-shadow: 2px 2px 0 0 #000;
+  }
+
+  .compteur-text {
+    font-size: 0.85rem;
+  }
+
+  .cardart {
+    grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+    justify-items: center;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* ========================================
+   RESPONSIVE - SMALL MOBILE
+======================================== */
+@media (max-width: 480px) {
+  .searchcarcl {
+    max-width: 98%;
+    padding: 0 0.25rem;
+  }
+
+  .searchBar input {
+    font-size: 0.85rem;
+    padding: 0.5em 0.7em;
+    box-shadow: 1px 1px 0 0, 2px 2px 0 0, 3px 3px 0 0;
+  }
+
+  .searchBar input:focus {
+    box-shadow: 1px 1px 0 0, 2px 2px 0 0, 3px 3px 0 0;
+    transform: translate(-1px, -1px);
+  }
+
+  .compteur-wrapper {
+    max-width: fit-content;
+    box-shadow: 2px 2px 0 0 #000;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .cardart {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem 0.5rem;
+  }
+
+  .results-footer {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================
+   DESKTOP - Centrage parfait et limite
+======================================== */
+@media (min-width: 1025px) {
+  .searchcarcl {
+    max-width: 700px;
+  }
+
+  .searchBar {
+    max-width: 700px;
+  }
+
+  .compteur-wrapper {
+    max-width: 350px;
+  }
+
+  .cardart {
+    max-width: 1400px;
+  }
+}
+
+/* ========================================
+   LARGE DESKTOP
+======================================== */
+@media (min-width: 1400px) {
+  .searchcarcl {
+    max-width: 800px;
+  }
+
+  .searchBar {
+    max-width: 800px;
+  }
+
+  .cardart {
+    max-width: 1600px;
   }
 }

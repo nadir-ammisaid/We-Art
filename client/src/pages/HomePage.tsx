@@ -2,110 +2,139 @@ import { useEffect, useState } from "react";
 import CardArt from "../components/CardArt";
 import Compteur from "../components/Compteur";
 import SearchBar from "../components/SearchBar";
+import { useArtworks } from "../hooks/useArtworks";
+import { useDebounce } from "../hooks/useDebounce";
 import "./HomePage.css";
-// on a du typer Artwork pour pouvoir l'utiliser dans l'état de la liste "artworks". Un cast explicite (ou assertion de type en TypeScript) est une manière de dire à TypeScript : "Je sais que cette donnée a ce type précis, même si TypeScript ne peut pas le déduire automatiquement." Cela permet de forcer TypeScript à traiter une variable comme étant d'un type spécifique. En gros, on a fait du forcing
 
-interface Artwork {
-  objectID: number;
-  title: string;
-  primaryImageSmall: string;
-  artistDisplayName: string;
-  country: string;
-}
+const DEFAULT_ARTWORKS_IDS = [
+  "436535", // Van Gogh - Wheat Field with Cypresses
+  "438817", // Mary Cassatt - The Dance Class
+  "459080", // Erasmus of Rotterdam
+  "436105", // The Death of Socrates
+  "247009", // Wall painting from Boscoreale
+  "45734", // Quail and Millet
+  "36700", // Street Scene in Winter
+  "267934", // The Crater, Petersburg
+  "544757", // Egyptian statue
+  "24975", // Armor (Gusoku)
+  "447797", // Prince Riding an Elephant
+  "336327", // Corridor in the Asylum
+  "313256", // Mirror-bearer
+  "207785", // Mirror
+  "392000", // Abraham's Sacrifice
+  "438012", // Bouquet of Chrysanthemums
+  "437329", // The Abduction of the Sabine Women
+  "437853", // Madame X - John Singer Sargent
+  "254890", // Bronze statuette dancer
+  "543864", // Sphinx of Senwosret III
+] as const;
 
 const HomePage = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([]); // Tableau des données récupérées
-  const [searchText, setSearchText] = useState(""); // État pour la barre de recherche
+  const [searchText, setSearchText] = useState("");
+  const [artworkIds, setArtworkIds] = useState<string[]>([
+    ...DEFAULT_ARTWORKS_IDS,
+  ]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const oeuvres = [
-    "392000",
-    "897121",
-    "199313",
-    "447797",
-    "247009",
-    "437326",
-    "436535",
-    "411913",
-    "36548",
-    "435860",
-  ];
+  const debouncedSearchText = useDebounce(searchText, 300);
+  const { artworks, loading, error } = useArtworks(artworkIds);
 
   useEffect(() => {
-    Promise.all([
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[0]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[1]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[2]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[3]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[4]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[5]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[6]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[7]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[8]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[9]}`,
-      ),
-    ])
-      .then((responses) =>
-        Promise.all(responses.map((response) => response.json())),
-      )
-      .then((artworksJson) => {
-        setArtworks(artworksJson); // Met à jour l'état artworks avec les données récupérées
-      })
-      .catch((err) =>
-        console.log("Erreur lors de la récupération des données :", err),
-      );
-  }, []);
+    if (debouncedSearchText === "") {
+      return;
+    }
 
-  // Filtrer les œuvres en fonction du titre et de l'artiste
-  const filteredArtworks = artworks.filter(
-    (artwork) =>
-      // on utilise un boléen pour inclure le titre et l'artiste dans la recherche "||"
-      // toLowerCase va mettre tout en minuscules même si l'utilisateur tape en mayuscules.
-      artwork.title?.toLowerCase().includes(searchText.toLowerCase()) ||
-      artwork.artistDisplayName
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()),
-  );
+    if (!debouncedSearchText.trim()) {
+      setArtworkIds([...DEFAULT_ARTWORKS_IDS]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    fetch(
+      `https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&q=${encodeURIComponent(
+        debouncedSearchText,
+      )}`,
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.objectIDs && data.objectIDs.length > 0) {
+          const ids = data.objectIDs.slice(0, 30).map(String);
+          setArtworkIds(ids);
+        } else {
+          setArtworkIds([]);
+        }
+        setIsSearching(false);
+      })
+      .catch((err) => {
+        console.error("Search error:", err);
+        setIsSearching(false);
+      });
+  }, [debouncedSearchText]);
 
   return (
     <div className="sbhomepage">
       <div className="searchcarcl">
         <SearchBar searchText={searchText} setSearchText={setSearchText} />
       </div>
-      <div className="compteur">
-        <Compteur />
-      </div>
+
+      <Compteur />
+
+      {error && (
+        <div className="error-banner">
+          <p>⚠️ Error loading artworks. Please try again later.</p>
+        </div>
+      )}
+
+      {(loading || isSearching) && (
+        <div className="loading-banner">
+          <div className="loader" />
+          <p>
+            {isSearching
+              ? "Searching the collection..."
+              : "Loading artworks..."}
+          </p>
+        </div>
+      )}
+
       <div className="cardart">
-        {filteredArtworks.length > 0 ? (
-          filteredArtworks.map((artwork) => (
-            <CardArt
-              key={artwork.objectID} // Assure une clé unique pour chaque composant
-              id={artwork.objectID.toString()}
-            />
-          ))
-        ) : searchText ? (
-          <p>No results for "{searchText}"</p>
-        ) : (
-          <p>Loading artworks...</p>
-        )}
+        {!loading && !isSearching && artworks.length > 0 ? (
+          <>
+            {artworks.map((artwork) => (
+              <CardArt key={artwork.objectID} artwork={artwork} />
+            ))}
+            <div className="results-footer">
+              {debouncedSearchText ? (
+                <p>
+                  Found <strong>{artworks.length}</strong> result
+                  {artworks.length !== 1 ? "s" : ""} for "{debouncedSearchText}"
+                </p>
+              ) : (
+                <p>
+                  Showing <strong>{artworks.length}</strong> artwork
+                  {artworks.length !== 1 ? "s" : ""} from the Metropolitan
+                  Museum
+                </p>
+              )}
+            </div>
+          </>
+        ) : !loading && !isSearching && debouncedSearchText ? (
+          <div className="empty-state">
+            <div className="empty-icon">🔍</div>
+            <h3>No results found</h3>
+            <p>Try searching for "Van Gogh", "Egyptian", or "Samurai"</p>
+          </div>
+        ) : !loading && !isSearching ? (
+          <div className="empty-state">
+            <div className="empty-icon">🎨</div>
+            <h3>No artworks available</h3>
+            <p>Please refresh the page</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );
