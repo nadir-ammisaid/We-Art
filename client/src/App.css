@@ -1,7 +1,3 @@
-.vgImg {
-  width: 10em;
-}
-
-footer {
-  text-align: center;
+body {
+  min-width: 400px;
 }

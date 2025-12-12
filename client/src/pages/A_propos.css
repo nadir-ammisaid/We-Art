@@ -1,0 +1,37 @@
+.mainAbout {
+  padding: 1em 3em 1em 3em;
+}
+
+.dreamTeamSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.dreamTeamImage {
+  width: 70vw;
+  margin-top: 1em;
+  border-radius: 1em;
+}
+
+#titre-a-propos {
+  font-family: monospace;
+  font-size: 1.8em;
+}
+#soustitre-apropos {
+  font-family: monospace;
+  font-size: 1.9em;
+  padding-bottom: 0.3em;
+  padding-top: 1.5em;
+}
+#text {
+  font-family: monospace;
+  font-size: 1.3em;
+  text-align: justify;
+  padding-bottom: 2em;
+}
+
+@media (min-width: 400px) {
+  .dreamTeamImage {
+    max-width: 35em;
+  }
+}

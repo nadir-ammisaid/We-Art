@@ -1,0 +1,46 @@
+.searchcarcl {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: 1em;
+  justify-content: right;
+  width: 100%;
+  height: auto;
+}
+
+.sbhomepage {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cardart {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.compteur {
+  text-align: center;
+}
+
+.searchcarcl {
+  justify-content: center;
+  padding-right: 1.5em;
+}
+.cardart p {
+  font-size: x-large;
+  text-align: center;
+  font-family: monospace;
+}
+
+@media (min-width: 400px) {
+  .searchcarcl {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-right: 1.5em;
+    justify-content: right;
+    width: 100%;
+    height: auto;
+  }
+}
