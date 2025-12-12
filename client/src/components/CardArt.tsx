@@ -8,12 +8,6 @@ interface CardArtProps {
   artwork: Artwork;
 }
 
-/**
- * Composant CardArt optimisé
- * - Reçoit les données directement au lieu de les fetcher
- * - Utilise React.memo pour éviter les re-renders inutiles
- * - Lazy loading des images
- */
 function CardArtComponent({ artwork }: CardArtProps) {
   const { toggleFavorite, isArtLiked } = useFavorites();
 
@@ -21,7 +15,6 @@ function CardArtComponent({ artwork }: CardArtProps) {
     toggleFavorite({ objectID: artwork.objectID.toString() });
   };
 
-  // Image par défaut si pas d'image disponible
   const imageSrc = artwork.primaryImageSmall || "/placeholder-art.jpg";
 
   return (
@@ -30,9 +23,8 @@ function CardArtComponent({ artwork }: CardArtProps) {
         className="cardArtImg"
         src={imageSrc}
         alt={artwork.title || "Untitled artwork"}
-        loading="lazy" // Lazy loading natif pour les performances
+        loading="lazy"
         onError={(e) => {
-          // Fallback si l'image ne charge pas
           e.currentTarget.src = "/placeholder-art.jpg";
         }}
       />
@@ -61,8 +53,6 @@ function CardArtComponent({ artwork }: CardArtProps) {
   );
 }
 
-// Mémoïser le composant pour éviter les re-renders inutiles
 export default memo(CardArtComponent, (prevProps, nextProps) => {
-  // Ne re-render que si l'ID de l'œuvre change
   return prevProps.artwork.objectID === nextProps.artwork.objectID;
 });

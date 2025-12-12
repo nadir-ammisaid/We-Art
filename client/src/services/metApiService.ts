@@ -1,153 +1,179 @@
-/**
- * Service API optimisé pour le Metropolitan Museum
- * Inclut cache intelligent et gestion des IDs invalides
- */
-
 export interface Artwork {
   objectID: number;
   title: string;
-  primaryImageSmall: string;
   artistDisplayName: string;
-  country: string;
   artistBeginDate?: string;
   artistEndDate?: string;
-  medium?: string;
-  creditLine?: string;
+  objectDate: string;
+  medium: string;
+  dimensions: string;
+  creditLine: string;
+  primaryImage: string;
+  primaryImageSmall: string;
+  department: string;
+  culture: string;
+  period: string;
+  dynasty: string;
+  reign: string;
+  portfolio: string;
+  classification: string;
+  objectName: string;
+  objectURL: string;
+  tags: Array<{ term: string; AAT_URL: string; Wikidata_URL: string }>;
   geographyType?: string;
   city?: string;
+  country?: string;
 }
 
-const cache = new Map<string, { data: Artwork; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const invalidIdsCache = new Set<string>();
+const CACHE_DURATION = 5 * 60 * 1000;
+const INVALID_CACHE_DURATION = 30 * 1000;
+const MAX_RETRY_COUNT = 3;
+const BATCH_SIZE = 5;
+const BATCH_DELAY = 150;
+
+interface CachedArtwork {
+  data: Artwork;
+  timestamp: number;
+}
+
+interface InvalidIdEntry {
+  timestamp: number;
+  retryCount: number;
+}
+
+const artworkCache = new Map<string, CachedArtwork>();
+const invalidIdsCache = new Map<string, InvalidIdEntry>();
+
+function cleanupInvalidCache() {
+  if (Math.random() > 0.9) {
+    const now = Date.now();
+    const expiredKeys: string[] = [];
+
+    for (const [key, entry] of invalidIdsCache.entries()) {
+      if (now - entry.timestamp > INVALID_CACHE_DURATION) {
+        expiredKeys.push(key);
+      }
+    }
+
+    for (const key of expiredKeys) {
+      invalidIdsCache.delete(key);
+    }
+  }
+}
+
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class MetApiService {
   private baseUrl = "https://collectionapi.metmuseum.org/public/collection/v1";
 
-  /**
-   * Récupère une œuvre par son ID avec cache
-   */
-  async getArtwork(id: string | number): Promise<Artwork | null> {
+  async getArtwork(id: string | number): Promise<Artwork> {
     const idStr = String(id);
-    const cacheKey = `artwork-${idStr}`;
+    cleanupInvalidCache();
 
-    // Vérifier le cache des IDs invalides
-    if (invalidIdsCache.has(idStr)) {
-      return null;
+    const invalidEntry = invalidIdsCache.get(idStr);
+    if (invalidEntry) {
+      const now = Date.now();
+      const isExpired = now - invalidEntry.timestamp > INVALID_CACHE_DURATION;
+
+      if (!isExpired && invalidEntry.retryCount >= MAX_RETRY_COUNT) {
+        throw new Error(`Artwork ${idStr} permanently unavailable`);
+      }
+
+      if (isExpired) {
+        invalidIdsCache.delete(idStr);
+      }
     }
 
-    // Vérifier le cache
-    const cached = cache.get(cacheKey);
+    const cached = artworkCache.get(idStr);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.data;
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/objects/${id}`);
+      const response = await fetch(`${this.baseUrl}/objects/${idStr}`);
 
       if (!response.ok) {
-        if (response.status === 404) {
-          invalidIdsCache.add(idStr);
+        if (response.status === 404 || response.status === 403) {
+          const currentEntry = invalidIdsCache.get(idStr);
+          const retryCount = currentEntry ? currentEntry.retryCount + 1 : 1;
+          invalidIdsCache.set(idStr, {
+            timestamp: Date.now(),
+            retryCount,
+          });
+          throw new Error(`Artwork not found (${response.status})`);
         }
-        return null;
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      const data: Artwork = await response.json();
+      const artwork: Artwork = await response.json();
 
-      // Vérifier que l'œuvre a une image
-      if (!data.primaryImageSmall || data.primaryImageSmall === "") {
-        invalidIdsCache.add(idStr);
-        return null;
+      if (!artwork.primaryImageSmall) {
+        const currentEntry = invalidIdsCache.get(idStr);
+        const retryCount = currentEntry ? currentEntry.retryCount + 1 : 1;
+        invalidIdsCache.set(idStr, {
+          timestamp: Date.now(),
+          retryCount,
+        });
+        throw new Error("No image available");
       }
 
-      // Mettre en cache
-      cache.set(cacheKey, { data, timestamp: Date.now() });
-
-      return data;
-    } catch (error) {
-      console.error(`Error fetching artwork ${id}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Récupère plusieurs œuvres en parallèle avec optimisation
-   */
-  async getArtworks(ids: (string | number)[]): Promise<Artwork[]> {
-    // Filtrer les IDs invalides connus
-    const validIds = ids.filter((id) => !invalidIdsCache.has(String(id)));
-
-    const results: (Artwork | null)[] = new Array(validIds.length);
-    const idsToFetch: (string | number)[] = [];
-    const indexMap = new Map<string | number, number>();
-
-    // Vérifier le cache pour chaque ID
-    validIds.forEach((id, index) => {
-      const cacheKey = `artwork-${id}`;
-      const cached = cache.get(cacheKey);
-
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        results[index] = cached.data;
-      } else {
-        idsToFetch.push(id);
-        indexMap.set(id, index);
-      }
-    });
-
-    // Récupérer les œuvres non cachées
-    if (idsToFetch.length > 0) {
-      const fetchPromises = idsToFetch.map((id) => this.getArtwork(id));
-      const fetchedArtworks = await Promise.all(fetchPromises);
-
-      fetchedArtworks.forEach((artwork, i) => {
-        const originalId = idsToFetch[i];
-        const originalIndex = indexMap.get(originalId);
-        if (originalIndex !== undefined) {
-          results[originalIndex] = artwork;
-        }
+      artworkCache.set(idStr, {
+        data: artwork,
+        timestamp: Date.now(),
       });
-    }
 
-    // Filtrer les résultats null
-    return results.filter((artwork): artwork is Artwork => artwork !== null);
+      invalidIdsCache.delete(idStr);
+
+      return artwork;
+    } catch (error) {
+      console.error(`Error fetching artwork ${idStr}:`, error);
+      throw error;
+    }
   }
 
-  /**
-   * Recherche des œuvres par mot-clé
-   */
-  async searchArtworks(query: string): Promise<number[]> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/search?hasImages=true&q=${encodeURIComponent(query)}`,
+  async getArtworks(
+    ids: (string | number)[],
+    onProgress?: (loaded: number, total: number) => void,
+  ): Promise<Artwork[]> {
+    const results: Artwork[] = [];
+    const total = ids.length;
+    let loaded = 0;
+
+    for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+      const batch = ids.slice(i, i + BATCH_SIZE);
+
+      const batchPromises = batch.map((id) =>
+        this.getArtwork(id)
+          .then((artwork) => {
+            loaded++;
+            if (onProgress) {
+              onProgress(loaded, total);
+            }
+            return artwork;
+          })
+          .catch((error) => {
+            console.error(`Failed to fetch artwork ${id}:`, error);
+            loaded++;
+            if (onProgress) {
+              onProgress(loaded, total);
+            }
+            return null;
+          }),
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const batchResults = await Promise.all(batchPromises);
+      results.push(
+        ...(batchResults.filter((artwork) => artwork !== null) as Artwork[]),
+      );
+
+      if (i + BATCH_SIZE < ids.length) {
+        await delay(BATCH_DELAY);
       }
-
-      const data = await response.json();
-      return data.objectIDs || [];
-    } catch (error) {
-      console.error("Error searching artworks:", error);
-      return [];
     }
-  }
 
-  /**
-   * Nettoie le cache
-   */
-  clearCache() {
-    cache.clear();
-    invalidIdsCache.clear();
-  }
-
-  /**
-   * Pré-charge des œuvres en arrière-plan
-   */
-  async preloadArtworks(ids: (string | number)[]) {
-    for (const id of ids) {
-      this.getArtwork(id);
-    }
+    return results;
   }
 }
 

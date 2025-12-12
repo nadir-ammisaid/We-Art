@@ -7,26 +7,26 @@ import { useDebounce } from "../hooks/useDebounce";
 import "./HomePage.css";
 
 const DEFAULT_ARTWORKS_IDS = [
-  "436535", // Van Gogh - Wheat Field with Cypresses
-  "438817", // Mary Cassatt - The Dance Class
-  "459080", // Erasmus of Rotterdam
-  "436105", // The Death of Socrates
-  "247009", // Wall painting from Boscoreale
-  "45734", // Quail and Millet
-  "36700", // Street Scene in Winter
-  "267934", // The Crater, Petersburg
-  "544757", // Egyptian statue
-  "24975", // Armor (Gusoku)
-  "447797", // Prince Riding an Elephant
-  "336327", // Corridor in the Asylum
-  "313256", // Mirror-bearer
-  "207785", // Mirror
-  "392000", // Abraham's Sacrifice
-  "438012", // Bouquet of Chrysanthemums
-  "437329", // The Abduction of the Sabine Women
-  "437853", // Madame X - John Singer Sargent
-  "254890", // Bronze statuette dancer
-  "543864", // Sphinx of Senwosret III
+  "436535",
+  "438817",
+  "459080",
+  "436105",
+  "247009",
+  "45734",
+  "36700",
+  "267934",
+  "544757",
+  "24975",
+  "447797",
+  "336327",
+  "313256",
+  "207785",
+  "392000",
+  "438012",
+  "437329",
+  "437853",
+  "254890",
+  "543864",
 ] as const;
 
 const HomePage = () => {
@@ -37,7 +37,7 @@ const HomePage = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   const debouncedSearchText = useDebounce(searchText, 300);
-  const { artworks, loading, error } = useArtworks(artworkIds);
+  const { artworks, loading, error, progress } = useArtworks(artworkIds);
 
   useEffect(() => {
     if (debouncedSearchText === "") {
@@ -76,6 +76,10 @@ const HomePage = () => {
       });
   }, [debouncedSearchText]);
 
+  const progressPercentage = progress
+    ? Math.round((progress.loaded / progress.total) * 100)
+    : 0;
+
   return (
     <div className="sbhomepage">
       <div className="searchcarcl">
@@ -91,21 +95,47 @@ const HomePage = () => {
       )}
 
       {(loading || isSearching) && (
-        <div className="loading-banner">
-          <div className="loader" />
-          <p>
-            {isSearching
-              ? "Searching the collection..."
-              : "Loading artworks..."}
-          </p>
+        <div className="loading-banner-enhanced">
+          <div className="loader-content">
+            <div className="loader-spinner" />
+            <div className="loader-text-container">
+              <p className="loader-main-text">
+                {isSearching
+                  ? "Searching the collection..."
+                  : "Loading artworks..."}
+              </p>
+              {progress && !isSearching && (
+                <div className="progress-info">
+                  <div className="progress-bar-container">
+                    <div
+                      className="progress-bar-fill"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                  <p className="progress-text">
+                    {progress.loaded} / {progress.total} artworks loaded (
+                    {progressPercentage}%)
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       <div className="cardart">
         {!loading && !isSearching && artworks.length > 0 ? (
           <>
-            {artworks.map((artwork) => (
-              <CardArt key={artwork.objectID} artwork={artwork} />
+            {artworks.map((artwork, index) => (
+              <div
+                key={artwork.objectID}
+                className="card-fade-in"
+                style={{
+                  animationDelay: `${index * 0.05}s`,
+                }}
+              >
+                <CardArt artwork={artwork} />
+              </div>
             ))}
             <div className="results-footer">
               {debouncedSearchText ? (

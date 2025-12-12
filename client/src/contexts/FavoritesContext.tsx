@@ -15,18 +15,14 @@ interface FavoritesContextType {
   favorites: ArtType[];
   isArtLiked: (objectID: string) => boolean;
   toggleFavorite: (art: ArtType) => void;
-  clearFavorites: () => void;
+  clearAllFavorites: () => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
 const STORAGE_KEY = "weart_favorites";
 
-/**
- * Context amélioré avec persistance localStorage
- */
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  // Initialisation depuis localStorage
   const [favorites, setFavorites] = useState<ArtType[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -37,7 +33,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  // Sauvegarder dans localStorage à chaque modification
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
@@ -46,7 +41,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   }, [favorites]);
 
-  // Mémoïser la fonction de vérification
   const isArtLiked = useCallback(
     (objectID: string) => {
       return favorites.some((artWork) => artWork.objectID === objectID);
@@ -54,7 +48,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     [favorites],
   );
 
-  // Mémoïser la fonction de toggle
   const toggleFavorite = useCallback((art: ArtType) => {
     if (!art?.objectID) {
       console.error("Invalid art object");
@@ -74,13 +67,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const clearFavorites = useCallback(() => {
+  const clearAllFavorites = useCallback(() => {
     setFavorites([]);
   }, []);
 
   return (
     <FavoritesContext.Provider
-      value={{ favorites, isArtLiked, toggleFavorite, clearFavorites }}
+      value={{ favorites, isArtLiked, toggleFavorite, clearAllFavorites }}
     >
       {children}
     </FavoritesContext.Provider>

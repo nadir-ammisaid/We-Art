@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { type Artwork, metApiService } from "../services/metApiService";
 
 interface UseArtworksReturn {
@@ -6,36 +6,51 @@ interface UseArtworksReturn {
   loading: boolean;
   error: string | null;
   refetch: () => void;
+  progress: { loaded: number; total: number } | null;
 }
 
-/**
- * Hook custom pour charger plusieurs œuvres
- */
 export function useArtworks(ids: (string | number)[]): UseArtworksReturn {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{
+    loaded: number;
+    total: number;
+  } | null>(null);
+
+  const idsString = useMemo(() => JSON.stringify(ids), [ids]);
 
   const fetchArtworks = useCallback(async () => {
-    if (ids.length === 0) {
+    const parsedIds = JSON.parse(idsString);
+
+    if (parsedIds.length === 0) {
       setArtworks([]);
       setLoading(false);
+      setProgress(null);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setProgress({ loaded: 0, total: parsedIds.length });
 
     try {
-      const data = await metApiService.getArtworks(ids);
+      const data = await metApiService.getArtworks(
+        parsedIds,
+        (loaded, total) => {
+          setProgress({ loaded, total });
+        },
+      );
       setArtworks(data);
+      setProgress(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue");
       console.error("Error in useArtworks:", err);
+      setProgress(null);
     } finally {
       setLoading(false);
     }
-  }, [ids]);
+  }, [idsString]);
 
   useEffect(() => {
     fetchArtworks();
@@ -46,6 +61,7 @@ export function useArtworks(ids: (string | number)[]): UseArtworksReturn {
     loading,
     error,
     refetch: fetchArtworks,
+    progress,
   };
 }
 
@@ -56,9 +72,6 @@ interface UseArtworkReturn {
   refetch: () => void;
 }
 
-/**
- * Hook custom pour charger une seule œuvre
- */
 export function useArtwork(id: string | number | undefined): UseArtworkReturn {
   const [artwork, setArtwork] = useState<Artwork | null>(null);
   const [loading, setLoading] = useState(true);
