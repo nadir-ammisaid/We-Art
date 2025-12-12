@@ -1,12 +1,13 @@
-nav ul {
+.navigation ul {
   display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  padding-bottom: 1em;
-  padding-left: 1em;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
-nav ul li {
+.navigation ul li {
   list-style-type: none;
 }
 
@@ -14,26 +15,61 @@ nav ul li {
   display: block;
   font-family: "Lucida Sans", sans-serif;
   background-color: #ffcd29;
-  font-size: small;
+  font-size: 0.85rem;
   letter-spacing: 1px;
   text-decoration: none;
   text-transform: uppercase;
   color: #000;
   cursor: pointer;
-  border: 3px solid;
-  padding: 0.2em 0.2em 0.2em 0.2em;
-  box-shadow: 1px 1px 0 0, 2px 2px 0 0, 3px 3px 0 0, 4px 4px 0 0, 5px 5px 0 0;
-  width: 6.8em;
+  border: 3px solid #000;
+  padding: 0.5rem 1.2rem;
+  box-shadow: 1px 1px 0 0, 2px 2px 0 0, 3px 3px 0 0;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.button-54:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 0, 3px 3px 0 0, 4px 4px 0 0;
 }
 
 .button-54-active {
   background-color: #2997fd;
-  color: #000000;
-  border-color: #000000;
+  color: #000;
+  border-color: #000;
 }
 
 .button-54:active {
   box-shadow: 0px 0px 0px 0px;
-  top: 5px;
-  left: 5px;
+  transform: translate(3px, 3px);
+}
+
+@media (max-width: 768px) {
+  .navigation ul {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .button-54 {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.9rem;
+    box-shadow: 1px 1px 0 0, 2px 2px 0 0;
+  }
+
+  .button-54:hover {
+    box-shadow: 2px 2px 0 0, 3px 3px 0 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navigation ul {
+    gap: 0.5rem;
+  }
+
+  .button-54 {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    letter-spacing: 0.5px;
+  }
 }

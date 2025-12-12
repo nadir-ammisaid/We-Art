@@ -4,9 +4,11 @@ import Navbar from "./Navbar";
 
 export default function Header() {
   return (
-    <div className="Header">
-      <Logo />
-      <Navbar />
-    </div>
+    <header className="Header">
+      <div className="header-container">
+        <Logo />
+        <Navbar />
+      </div>
+    </header>
   );
 }

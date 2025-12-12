@@ -1,9 +1,40 @@
+.logoWeArt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .logoWeArt img {
-  width: 100%;
-  max-width: 7em;
+  width: 60px;
   height: auto;
 }
 
-.logoWeArt {
-  text-align: center;
+.logo-text {
+  font-family: "Lucida Sans", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffcd29;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+  .logoWeArt img {
+    width: 50px;
+  }
+
+  .logo-text {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoWeArt img {
+    width: 45px;
+  }
+
+  .logo-text {
+    font-size: 1.2rem;
+    letter-spacing: 1.5px;
+  }
 }

@@ -2,110 +2,169 @@ import { useEffect, useState } from "react";
 import CardArt from "../components/CardArt";
 import Compteur from "../components/Compteur";
 import SearchBar from "../components/SearchBar";
+import { useArtworks } from "../hooks/useArtworks";
+import { useDebounce } from "../hooks/useDebounce";
 import "./HomePage.css";
-// on a du typer Artwork pour pouvoir l'utiliser dans l'état de la liste "artworks". Un cast explicite (ou assertion de type en TypeScript) est une manière de dire à TypeScript : "Je sais que cette donnée a ce type précis, même si TypeScript ne peut pas le déduire automatiquement." Cela permet de forcer TypeScript à traiter une variable comme étant d'un type spécifique. En gros, on a fait du forcing
 
-interface Artwork {
-  objectID: number;
-  title: string;
-  primaryImageSmall: string;
-  artistDisplayName: string;
-  country: string;
-}
+const DEFAULT_ARTWORKS_IDS = [
+  "436535",
+  "438817",
+  "459080",
+  "436105",
+  "247009",
+  "45734",
+  "36700",
+  "267934",
+  "544757",
+  "24975",
+  "447797",
+  "336327",
+  "313256",
+  "207785",
+  "392000",
+  "438012",
+  "437329",
+  "437853",
+  "254890",
+  "543864",
+] as const;
 
 const HomePage = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([]); // Tableau des données récupérées
-  const [searchText, setSearchText] = useState(""); // État pour la barre de recherche
+  const [searchText, setSearchText] = useState("");
+  const [artworkIds, setArtworkIds] = useState<string[]>([
+    ...DEFAULT_ARTWORKS_IDS,
+  ]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const oeuvres = [
-    "392000",
-    "897121",
-    "199313",
-    "447797",
-    "247009",
-    "437326",
-    "436535",
-    "411913",
-    "36548",
-    "435860",
-  ];
+  const debouncedSearchText = useDebounce(searchText, 300);
+  const { artworks, loading, error, progress } = useArtworks(artworkIds);
 
   useEffect(() => {
-    Promise.all([
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[0]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[1]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[2]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[3]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[4]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[5]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[6]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[7]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[8]}`,
-      ),
-      fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${oeuvres[9]}`,
-      ),
-    ])
-      .then((responses) =>
-        Promise.all(responses.map((response) => response.json())),
-      )
-      .then((artworksJson) => {
-        setArtworks(artworksJson); // Met à jour l'état artworks avec les données récupérées
-      })
-      .catch((err) =>
-        console.log("Erreur lors de la récupération des données :", err),
-      );
-  }, []);
+    if (debouncedSearchText === "") {
+      return;
+    }
 
-  // Filtrer les œuvres en fonction du titre et de l'artiste
-  const filteredArtworks = artworks.filter(
-    (artwork) =>
-      // on utilise un boléen pour inclure le titre et l'artiste dans la recherche "||"
-      // toLowerCase va mettre tout en minuscules même si l'utilisateur tape en mayuscules.
-      artwork.title?.toLowerCase().includes(searchText.toLowerCase()) ||
-      artwork.artistDisplayName
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()),
-  );
+    if (!debouncedSearchText.trim()) {
+      setArtworkIds([...DEFAULT_ARTWORKS_IDS]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    fetch(
+      `https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&q=${encodeURIComponent(
+        debouncedSearchText,
+      )}`,
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.objectIDs && data.objectIDs.length > 0) {
+          const ids = data.objectIDs.slice(0, 30).map(String);
+          setArtworkIds(ids);
+        } else {
+          setArtworkIds([]);
+        }
+        setIsSearching(false);
+      })
+      .catch((err) => {
+        console.error("Search error:", err);
+        setIsSearching(false);
+      });
+  }, [debouncedSearchText]);
+
+  const progressPercentage = progress
+    ? Math.round((progress.loaded / progress.total) * 100)
+    : 0;
 
   return (
     <div className="sbhomepage">
       <div className="searchcarcl">
         <SearchBar searchText={searchText} setSearchText={setSearchText} />
       </div>
-      <div className="compteur">
-        <Compteur />
-      </div>
+
+      <Compteur />
+
+      {error && (
+        <div className="error-banner">
+          <p>⚠️ Error loading artworks. Please try again later.</p>
+        </div>
+      )}
+
+      {(loading || isSearching) && (
+        <div className="loading-banner-enhanced">
+          <div className="loader-content">
+            <div className="loader-spinner" />
+            <div className="loader-text-container">
+              <p className="loader-main-text">
+                {isSearching
+                  ? "Searching the collection..."
+                  : "Loading artworks..."}
+              </p>
+              {progress && !isSearching && (
+                <div className="progress-info">
+                  <div className="progress-bar-container">
+                    <div
+                      className="progress-bar-fill"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                  <p className="progress-text">
+                    {progress.loaded} / {progress.total} artworks loaded (
+                    {progressPercentage}%)
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="cardart">
-        {filteredArtworks.length > 0 ? (
-          filteredArtworks.map((artwork) => (
-            <CardArt
-              key={artwork.objectID} // Assure une clé unique pour chaque composant
-              id={artwork.objectID.toString()}
-            />
-          ))
-        ) : searchText ? (
-          <p>No results for "{searchText}"</p>
-        ) : (
-          <p>Loading artworks...</p>
-        )}
+        {!loading && !isSearching && artworks.length > 0 ? (
+          <>
+            {artworks.map((artwork, index) => (
+              <div
+                key={artwork.objectID}
+                className="card-fade-in"
+                style={{
+                  animationDelay: `${index * 0.05}s`,
+                }}
+              >
+                <CardArt artwork={artwork} />
+              </div>
+            ))}
+            <div className="results-footer">
+              {debouncedSearchText ? (
+                <p>
+                  Found <strong>{artworks.length}</strong> result
+                  {artworks.length !== 1 ? "s" : ""} for "{debouncedSearchText}"
+                </p>
+              ) : (
+                <p>
+                  Showing <strong>{artworks.length}</strong> artwork
+                  {artworks.length !== 1 ? "s" : ""} from the Metropolitan
+                  Museum
+                </p>
+              )}
+            </div>
+          </>
+        ) : !loading && !isSearching && debouncedSearchText ? (
+          <div className="empty-state">
+            <div className="empty-icon">🔍</div>
+            <h3>No results found</h3>
+            <p>Try searching for "Van Gogh", "Egyptian", or "Samurai"</p>
+          </div>
+        ) : !loading && !isSearching ? (
+          <div className="empty-state">
+            <div className="empty-icon">🎨</div>
+            <h3>No artworks available</h3>
+            <p>Please refresh the page</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

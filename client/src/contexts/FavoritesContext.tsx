@@ -1,43 +1,79 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 
-interface artType {
+interface ArtType {
   objectID: string;
 }
 
 interface FavoritesContextType {
-  favorites: artType[];
-  setFavorites: React.Dispatch<React.SetStateAction<artType[]>>;
+  favorites: ArtType[];
   isArtLiked: (objectID: string) => boolean;
-  toggleFavorite: (art: artType) => void;
+  toggleFavorite: (art: ArtType) => void;
+  clearAllFavorites: () => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
+const STORAGE_KEY = "weart_favorites";
+
 export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<artType[]>([]);
-
-  const isArtLiked = (objectID: string) => {
-    return favorites.some((artWork) => artWork.objectID === objectID);
-  };
-
-  const toggleFavorite = (art: artType) => {
-    if (!art) return;
-
-    const alreadyLiked = isArtLiked(art.objectID);
-
-    if (alreadyLiked) {
-      setFavorites((prev) =>
-        prev.filter((artWork) => artWork.objectID !== art.objectID),
-      );
-    } else {
-      setFavorites((prev) => [...prev, art]);
+  const [favorites, setFavorites] = useState<ArtType[]>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error("Error loading favorites from localStorage:", error);
+      return [];
     }
-  };
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+    } catch (error) {
+      console.error("Error saving favorites to localStorage:", error);
+    }
+  }, [favorites]);
+
+  const isArtLiked = useCallback(
+    (objectID: string) => {
+      return favorites.some((artWork) => artWork.objectID === objectID);
+    },
+    [favorites],
+  );
+
+  const toggleFavorite = useCallback((art: ArtType) => {
+    if (!art?.objectID) {
+      console.error("Invalid art object");
+      return;
+    }
+
+    setFavorites((prev) => {
+      const alreadyLiked = prev.some(
+        (artWork) => artWork.objectID === art.objectID,
+      );
+
+      if (alreadyLiked) {
+        return prev.filter((artWork) => artWork.objectID !== art.objectID);
+      }
+
+      return [...prev, art];
+    });
+  }, []);
+
+  const clearAllFavorites = useCallback(() => {
+    setFavorites([]);
+  }, []);
 
   return (
     <FavoritesContext.Provider
-      value={{ favorites, setFavorites, isArtLiked, toggleFavorite }}
+      value={{ favorites, isArtLiked, toggleFavorite, clearAllFavorites }}
     >
       {children}
     </FavoritesContext.Provider>
