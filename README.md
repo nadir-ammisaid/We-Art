@@ -282,10 +282,11 @@ MAX_RETRY_COUNT = 3
 **Pull Requests** : 50+  
 **Méthodologie** : Scrum
 
-[Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
+Par [Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
 
 Vos avis m'intéressent - n'hésitez pas à me faire part de vos retours ou suggestions !  
-📩 Contact : [LinkedIn](https://www.linkedin.com/in/nadir-ammisaid/)
+📩 Contact : [LinkedIn.com/in/Nadir-AmmiSaid](https://www.linkedin.com/in/nadir-ammisaid/)
+🌐 Portfolio : [portfolio-nad.vercel.app](https://www.portfolio-nad.vercel.app/)
 
 ## Contribution
 
@@ -588,10 +589,11 @@ MAX_RETRY_COUNT = 3
 **Pull Requests**: 50+  
 **Methodology**: Scrum
 
-[Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
+By [Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
 
 Your feedback matters - don't hesitate to share your thoughts or suggestions!  
-📩 Contact: [LinkedIn](https://www.linkedin.com/in/nadir-ammisaid/)
+📩 Contact: [LinkedIn.com/in/Nadir-AmmiSaid](https://www.linkedin.com/in/nadir-ammisaid/)
+🌐 Portfolio : [portfolio-nad.vercel.app](https://www.portfolio-nad.vercel.app/)
 
 ## Contribution
 
