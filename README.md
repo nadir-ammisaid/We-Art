@@ -1,366 +1,616 @@
-# projet2
+<a href="#fr">
+  <img src="https://flagcdn.com/w40/fr.png" width="20" alt="Français"> Français
+</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="#en">
+  <img src="https://flagcdn.com/w40/gb.png" width="20" alt="English"> English
+</a>
 
-Ce projet est un monorepo JS, suivant l'architecture React-Express-MySQL telle qu'enseignée à la Wild Code School (v7.1.7) :
+<hr style="margin-top: 4px; margin-bottom: 12px; border: none; border-top: 1px solid #ccc;" />
 
-```mermaid
-sequenceDiagram
-    box Web Client
-    participant React as React
-    participant Fetcher as Fetcher
-    end
-    box Web Server
-    participant Express as Express
-    participant Module as Module
-    end
-    box DB Server
-    participant DB as MySQL Server
-    end
+<img id="fr" src="https://flagcdn.com/w40/fr.png" width="20" alt="Français"> Français
 
-    React-)Fetcher: event
-    activate Fetcher
-    Fetcher-)Express: requête (HTTP)
-    activate Express
-    Express-)Module: appel
-    activate Module
-    Module-)DB: requête SQL
-    activate DB
-    DB--)Module: données
-    deactivate DB
-    Module--)Express: json
-    deactivate Module
-    Express--)Fetcher: réponse HTTP
-    deactivate Express
-    Fetcher--)React: render
-    deactivate Fetcher
+<h1>We Art</h1>
+
+We Art est une application web responsive permettant d'explorer, rechercher et sauvegarder des œuvres d'art du Metropolitan Museum of Art. L'application offre une interface moderne et intuitive pour découvrir des milliers d'œuvres d'art avec des fonctionnalités de recherche avancée et de gestion de favoris.
+
+Projet collaboratif réalisé en équipe de 3 développeurs sur 1 mois, en suivant la méthodologie Agile/Scrum avec plus de 50 pull requests.
+
+🔗 Découvrez le projet en ligne : [Lien à venir]
+
+**Vos avis m'intéressent - n'hésitez pas à me faire part de vos retours ou suggestions !**
+
+## Stack Technique
+
+- **Frontend** : React + TypeScript + Vite
+- **API** : Metropolitan Museum of Art Collection API (REST)
+- **State Management** : Context API (React)
+- **Styling** : CSS3 (Design Neo-Brutalist)
+- **Storage** : localStorage (favoris)
+- **Qualité** : Biome (linting & formatting), TypeScript strict mode
+- **Gestion** : Git, GitHub, Scrum
+
+## Fonctionnalités Principales
+
+### Exploration d'œuvres
+
+- Affichage de 20 œuvres d'art par défaut du Metropolitan Museum
+- Interface responsive adaptée mobile, tablette et desktop
+- Design Neo-Brutalist moderne et distinctif
+- Chargement progressif avec barre de progression
+- Animations fluides d'apparition des cartes
+
+### Recherche Avancée
+
+- Recherche en temps réel dans la collection du musée
+- Debouncing automatique (300ms) pour optimiser les performances
+- Affichage jusqu'à 30 résultats par recherche
+- Gestion intelligente des états (chargement, erreur, vide)
+
+### Gestion des Favoris
+
+- Ajout/suppression de favoris en un clic
+- Persistance des favoris dans localStorage
+- Page dédiée aux favoris avec chargement optimisé
+- Bouton "Clear All" pour vider tous les favoris
+- Compteur de favoris dans le header
+
+### Responsive Design
+
+- Layout adaptatif :
+  - **Desktop** : Grid 3-4 colonnes, header horizontal
+  - **Tablet** : Grid 2-3 colonnes
+  - **Mobile** : 1 colonne, cards à 90-95% de largeur
+- Navigation optimisée pour tous les écrans
+- Touch-friendly sur mobile
+
+### Optimisations Performances
+
+- **Système de cache intelligent** :
+  - Cache des œuvres valides : 5 minutes
+  - Cache des IDs invalides : 30 secondes avec retry (max 3)
+  - Nettoyage automatique des caches expirés
+- **Chargement par batch** :
+  - 5 œuvres chargées simultanément
+  - Délai de 150ms entre chaque batch
+  - Évite les erreurs 403 (rate limiting API)
+- **Progressive loading** : Barre de progression en temps réel
+- **React.memo** : Optimisation des re-renders
+- **Lazy loading** : Images chargées à la demande
+
+## Architecture du Projet
+
 ```
-
-Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à produire du code de qualité industrielle, tout en restant un outil pédagogique :
-
-- **Concurrently** : Permet d'exécuter plusieurs commandes simultanément dans le même terminal.
-- **Husky** : Permet d'exécuter des commandes spécifiques déclenchées par des événements _git_.
-- **Vite** : Alternative à _Create-React-App_, offrant une expérience plus fluide avec moins d'outils.
-- **Biome** : Alternative à _ESlint_ et _Prettier_, assurant la qualité du code selon des règles choisies.
-- **Supertest** : Bibliothèque pour tester les serveurs HTTP en node.js.
-
-## Table des Matières
-
-- [projet2](#name)
-  - [Table des Matières](#table-des-matières)
-  - [Utilisateurs Windows](#utilisateurs-windows)
-  - [Installation \& Utilisation](#installation--utilisation)
-  - [Les choses à retenir](#les-choses-à-retenir)
-    - [Commandes de Base](#commandes-de-base)
-    - [Structure des Dossiers](#structure-des-dossiers)
-    - [Mettre en place la base de données](#mettre-en-place-la-base-de-données)
-    - [Développer la partie back-end](#développer-la-partie-back-end)
-    - [REST](#rest)
-    - [Autres Bonnes Pratiques](#autres-bonnes-pratiques)
-  - [FAQ](#faq)
-    - [Déploiement avec Traefik](#déploiement-avec-traefik)
-    - [Variables d'environnement spécifiques](#variables-denvironnement-spécifiques)
-    - [Logs](#logs)
-    - [Contribution](#contribution)
-
-## Utilisateurs Windows
-
-Assurez-vous de lancer ces commandes dans un terminal Git pour éviter [les problèmes de formats de nouvelles lignes](https://en.wikipedia.org/wiki/Newline#Issues_with_different_newline_formats) :
-
-```sh
-git config --global core.eol lf
-git config --global core.autocrlf false
-```
-
-## Installation & Utilisation
-
-1. Installez le plugin **Biome** dans VSCode et configurez-le.
-2. Clonez ce dépôt, puis accédez au répertoire cloné.
-3. Exécutez la commande `npm install`.
-4. Créez des fichiers d'environnement (`.env`) dans les répertoires `server` et `client` : vous pouvez copier les fichiers `.env.sample` comme modèles (**ne les supprimez pas**).
-
-## Les choses à retenir
-
-### Commandes de Base
-
-| Commande               | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| `npm install`          | Installe les dépendances pour le client et le serveur                       |
-| `npm run db:migrate`   | Met à jour la base de données à partir d'un schéma défini                   |
-| `npm run dev`          | Démarre les deux serveurs (client et serveur) dans un seul terminal         |
-| `npm run check`        | Exécute les outils de validation (linting et formatage)                     |
-| `npm run test`         | Exécute les tests unitaires et d'intégration                                |
-
-### Structure des Dossiers
-
-```plaintext
-my-project/
+We-Art/
+├── client/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       │   └── images/
+│       ├── components/
+│       │   ├── CardArt.tsx
+│       │   ├── Compteur.tsx
+│       │   ├── Header.tsx
+│       │   ├── Logo.tsx
+│       │   ├── Navbar.tsx
+│       │   └── SearchBar.tsx
+│       ├── contexts/
+│       │   └── FavoritesContext.tsx
+│       ├── hooks/
+│       │   ├── useArtworks.ts
+│       │   └── useDebounce.ts
+│       ├── pages/
+│       │   ├── About.tsx
+│       │   ├── Article.tsx
+│       │   ├── Favoris.tsx
+│       │   └── HomePage.tsx
+│       ├── services/
+│       │   └── metApiService.ts
+│       ├── App.tsx
+│       └── main.tsx
+│   ├── vite.config.ts
+│   └── tsconfig.json
 │
-├── server/
-│   ├── app/
-│   │   ├── modules/
-│   │   │   ├── item/
-│   │   │   │   ├── itemActions.ts
-│   │   │   │   └── itemRepository.ts
-│   │   │   └── ...
-│   │   ├── app.ts
-│   │   ├── main.ts
-│   │   └── router.ts
-│   ├── database/
-│   │   ├── client.ts
-│   │   └── schema.sql
-│   ├── tests/
-│   ├── .env
-│   └── .env.sample
+└── package.json
+```
+
+## Démarrer le Projet
+
+### Prérequis
+
+- Node.js (v18+)
+- npm ou yarn
+
+### Installation
+
+1. **Cloner le dépôt** :
+
+   ```bash
+   git clone https://github.com/votre-username/We-Art.git
+   cd We-Art
+   ```
+
+2. **Installer les dépendances** :
+
+   ```bash
+   npm install
+   ```
+
+3. **Configurer les variables d'environnement** :
+
+   Créer un fichier `.env` dans le dossier `client/` :
+
+   ```env
+   VITE_API_URL=https://collectionapi.metmuseum.org/public/collection/v1
+   ```
+
+4. **Lancer l'application** :
+
+   ```bash
+   npm run dev
+   ```
+
+   L'application sera accessible sur `http://localhost:5173`
+
+### Commandes Disponibles
+
+| Commande              | Description                         |
+| --------------------- | ----------------------------------- |
+| `npm run dev`         | Lance le serveur de développement   |
+| `npm run build`       | Build de production                 |
+| `npm run preview`     | Prévisualise le build de production |
+| `npm run check`       | Vérifie le code (Biome)             |
+| `npm run check:write` | Corrige automatiquement les erreurs |
+| `npm run check-types` | Vérifie les types TypeScript        |
+
+## API Utilisée
+
+### Metropolitan Museum of Art Collection API
+
+**Base URL** : `https://collectionapi.metmuseum.org/public/collection/v1`
+
+**Endpoints utilisés** :
+
+| Méthode | Endpoint                           | Description         |
+| ------- | ---------------------------------- | ------------------- |
+| GET     | `/search?hasImages=true&q={query}` | Recherche d'œuvres  |
+| GET     | `/objects/{objectID}`              | Détails d'une œuvre |
+
+**Documentation officielle** : [Met Museum API](https://metmuseum.github.io/)
+
+**Limitations** :
+
+- Rate limiting : ~80 requêtes par seconde
+- Gestion intelligente implémentée (batching + delays)
+- Retry automatique pour les erreurs temporaires
+
+## Gestion du Cache
+
+### Cache des Œuvres Valides
+
+```typescript
+CACHE_DURATION = 5 minutes
+```
+
+- Réduit les appels API redondants
+- Améliore les performances
+- Expiration automatique
+
+### Cache des IDs Invalides
+
+```typescript
+INVALID_CACHE_DURATION = 30 secondes
+MAX_RETRY_COUNT = 3
+```
+
+- Évite de re-tenter les IDs qui échouent systématiquement
+- Système de retry avec compteur
+- Nettoyage automatique (10% de chance à chaque appel)
+
+## Méthodologie de Développement
+
+### Agile/Scrum
+
+- **Sprints** : 1 semaine
+- **Daily Standups** : Synchronisation quotidienne
+- **Retrospectives** : Amélioration continue
+- **Pull Requests** : 50+ PR sur 1 mois
+- **Code Reviews** : Validation par les pairs
+
+### Bonnes Pratiques
+
+- **Git Flow** : Feature branches + PR
+- **Conventional Commits** : Messages normalisés
+- **TypeScript Strict** : Type safety maximale
+- **Biome** : Qualité de code automatisée
+- **React Best Practices** : Hooks, memo, lazy loading
+
+## Optimisations Techniques Implémentées
+
+### Performance
+
+1. **Batch Loading** : Chargement par lots de 5 œuvres
+2. **Progressive UI** : Affichage progressif avec barre de progression
+3. **Debouncing** : Recherche optimisée (300ms)
+4. **React.memo** : Évite les re-renders inutiles
+5. **Lazy Loading** : Images chargées à la demande
+6. **Cache System** : Double cache (valide/invalide)
+
+### UX/UI
+
+1. **Loading States** : Loaders animés + compteurs temps réel
+2. **Error Handling** : Messages clairs et actionables
+3. **Empty States** : Guides l'utilisateur
+4. **Animations** : Fade-in progressif des cartes
+5. **Responsive** : Adaptatif mobile/tablette/desktop
+
+### Résolution de Bugs
+
+1. **Infinite Loop** : Stabilisation des dépendances `useMemo`
+2. **403 Errors** : Système de batching + delays
+3. **Cache Issues** : Expiration et retry intelligents
+4. **Mobile Layout** : Cards uniformes sur mobile
+
+## Design System
+
+### Couleurs
+
+- **Primary** : `#ffcd29` (Jaune)
+- **Secondary** : `#2997fd` (Bleu)
+- **Background** : `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
+- **Text** : `#000` (Noir)
+- **Cards** : `#cbcbcb` (Gris clair)
+
+### Style Neo-Brutalist
+
+- Bordures épaisses (3px) noires
+- Pas de border-radius
+- Box-shadows décalées (offset)
+- Typographie uppercase avec letterspacing
+- Hover effects avec transform
+
+## Équipe
+
+**Projet collaboratif développé par une équipe de 3 développeurs**, avec des contributions significatives sur :
+
+- Architecture frontend et conception des composants
+- Intégration API et optimisation des performances
+- Gestion d'état et système de cache
+- Implémentation du design responsive
+- Qualité du code et tests
+
+**Durée** : 1 mois (Sprint Agile)  
+**Pull Requests** : 50+  
+**Méthodologie** : Scrum
+
+[Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
+
+Vos avis m'intéressent - n'hésitez pas à me faire part de vos retours ou suggestions !  
+📩 Contact : [LinkedIn](https://www.linkedin.com/in/nadir-ammisaid/)
+
+## Contribution
+
+Pour contribuer au projet :
+
+1. **Fork** le dépôt
+2. **Clone** votre fork sur votre machine locale
+3. Créez une nouvelle branche (`git switch -c feature/ma-fonctionnalite`)
+4. **Commit** vos modifications (`git commit -m 'feat: ajout fonctionnalité X'`)
+5. **Push** vers votre branche (`git push origin feature/ma-fonctionnalite`)
+6. Créez une **Pull Request**
+
+**Bonnes pratiques** :
+
+- Exécutez `npm run check` avant de pousser
+- Respectez les conventions de commit
+- Ajoutez des tests si nécessaire
+- Documentez les nouvelles fonctionnalités
+
+## Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+<br/>
+<hr id="en" style="margin-top: 4px; margin-bottom: 12px; border: none; border-top: 1px solid #ccc;" />
+<br/>
+
+<img src="https://flagcdn.com/w40/gb.png" width="20" alt="English"> English
+
+<h1>We Art</h1>
+
+We Art is a responsive web application for exploring, searching, and saving artworks from the Metropolitan Museum of Art. The application offers a modern and intuitive interface to discover thousands of artworks with advanced search features and favorites management.
+
+Collaborative project developed by a team of 3 developers over 1 month, following Agile/Scrum methodology with 50+ pull requests.
+
+🔗 Discover the project online: [Link coming soon]
+
+**Your feedback matters - don't hesitate to share your thoughts or suggestions!**
+
+## Tech Stack
+
+- **Frontend**: React + TypeScript + Vite
+- **API**: Metropolitan Museum of Art Collection API (REST)
+- **State Management**: Context API (React)
+- **Styling**: CSS3 (Neo-Brutalist Design)
+- **Storage**: localStorage (favorites)
+- **Quality**: Biome (linting & formatting), TypeScript strict mode
+- **Management**: Git, GitHub, Scrum
+
+## Main Features
+
+### Artwork Exploration
+
+- Display 20 artworks by default from the Metropolitan Museum
+- Responsive interface adapted for mobile, tablet, and desktop
+- Modern and distinctive Neo-Brutalist design
+- Progressive loading with progress bar
+- Smooth card appearance animations
+
+### Advanced Search
+
+- Real-time search through the museum collection
+- Automatic debouncing (300ms) for optimized performance
+- Display up to 30 results per search
+- Intelligent state management (loading, error, empty)
+
+### Favorites Management
+
+- Add/remove favorites with one click
+- Favorites persistence in localStorage
+- Dedicated favorites page with optimized loading
+- "Clear All" button to empty all favorites
+- Favorites counter in header
+
+### Responsive Design
+
+- Adaptive layout:
+  - **Desktop**: 3-4 column grid, horizontal header
+  - **Tablet**: 2-3 column grid
+  - **Mobile**: 1 column, cards at 90-95% width
+- Optimized navigation for all screens
+- Touch-friendly on mobile
+
+### Performance Optimizations
+
+- **Smart cache system**:
+  - Valid artworks cache: 5 minutes
+  - Invalid IDs cache: 30 seconds with retry (max 3)
+  - Automatic cleanup of expired caches
+- **Batch loading**:
+  - 5 artworks loaded simultaneously
+  - 150ms delay between batches
+  - Prevents 403 errors (API rate limiting)
+- **Progressive loading**: Real-time progress bar
+- **React.memo**: Re-render optimization
+- **Lazy loading**: Images loaded on demand
+
+## Project Architecture
+
+```
+We-Art/
+├── client/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       │   └── images/
+│       ├── components/
+│       │   ├── CardArt.tsx
+│       │   ├── Compteur.tsx
+│       │   ├── Header.tsx
+│       │   ├── Logo.tsx
+│       │   ├── Navbar.tsx
+│       │   └── SearchBar.tsx
+│       ├── contexts/
+│       │   └── FavoritesContext.tsx
+│       ├── hooks/
+│       │   ├── useArtworks.ts
+│       │   └── useDebounce.ts
+│       ├── pages/
+│       │   ├── About.tsx
+│       │   ├── Article.tsx
+│       │   ├── Favoris.tsx
+│       │   └── HomePage.tsx
+│       ├── services/
+│       │   └── metApiService.ts
+│       ├── App.tsx
+│       └── main.tsx
+│   ├── vite.config.ts
+│   └── tsconfig.json
 │
-└── client/
-    ├── src/
-    │   ├── components/
-    │   ├── pages/
-    │   └── App.tsx
-    ├── .env
-    └── .env.sample
+└── package.json
 ```
 
-### Mettre en place la base de données
+## Getting Started
 
-**Créer et remplir le fichier `.env`** dans le dossier `server` :
+### Prerequisites
 
-```plaintext
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=not_root
-DB_PASSWORD=password
-DB_NAME=my_database
-```
+- Node.js (v18+)
+- npm or yarn
 
-**Les variables sont utilisés** dans `server/database/client.ts` :
+### Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/your-username/We-Art.git
+   cd We-Art
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**:
+
+   Create a `.env` file in the `client/` folder:
+
+   ```env
+   VITE_API_URL=https://collectionapi.metmuseum.org/public/collection/v1
+   ```
+
+4. **Launch the application**:
+
+   ```bash
+   npm run dev
+   ```
+
+   The application will be accessible at `http://localhost:5173`
+
+### Available Commands
+
+| Command               | Description              |
+| --------------------- | ------------------------ |
+| `npm run dev`         | Start development server |
+| `npm run build`       | Production build         |
+| `npm run preview`     | Preview production build |
+| `npm run check`       | Check code (Biome)       |
+| `npm run check:write` | Auto-fix errors          |
+| `npm run check-types` | Check TypeScript types   |
+
+## API Used
+
+### Metropolitan Museum of Art Collection API
+
+**Base URL**: `https://collectionapi.metmuseum.org/public/collection/v1`
+
+**Endpoints used**:
+
+| Method | Endpoint                           | Description     |
+| ------ | ---------------------------------- | --------------- |
+| GET    | `/search?hasImages=true&q={query}` | Search artworks |
+| GET    | `/objects/{objectID}`              | Artwork details |
+
+**Official documentation**: [Met Museum API](https://metmuseum.github.io/)
+
+**Limitations**:
+
+- Rate limiting: ~80 requests per second
+- Smart handling implemented (batching + delays)
+- Automatic retry for temporary errors
+
+## Cache Management
+
+### Valid Artworks Cache
 
 ```typescript
-const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
-import mysql from "mysql2/promise";
-
-const client = mysql.createPool({
-  host: DB_HOST,
-  port: DB_PORT as number | undefined,
-  user: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
-});
-
-export default client;
+CACHE_DURATION = 5 minutes
 ```
 
-**Créer une table** dans `server/database/schema.sql` :
+- Reduces redundant API calls
+- Improves performance
+- Automatic expiration
 
-```sql
-CREATE TABLE item (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  user_id INT NOT NULL,
-  FOREIGN KEY(user_id) REFERENCES user(id)
-);
-```
-
-**Insérer des données** dans `server/database/schema.sql` :
-
-```sql
-INSERT INTO item (title, user_id) VALUES
-  ('Sample Item 1', 1),
-  ('Sample Item 2', 2);
-```
-
-**Synchroniser la BDD avec le schema** :
-
-```sh
-npm run db:migrate
-```
-
-### Développer la partie back-end
-
-**Créer une route** dans `server/app/router.ts` :
+### Invalid IDs Cache
 
 ```typescript
-// ...
-
-/* ************************************************************************* */
-// Define Your API Routes Here
-/* ************************************************************************* */
-
-// Define item-related routes
-import itemActions from "./modules/item/itemActions";
-
-router.get("/api/items", itemActions.browse);
-
-/* ************************************************************************* */
-
-// ...
+INVALID_CACHE_DURATION = 30 seconds
+MAX_RETRY_COUNT = 3
 ```
 
-**Définir une action** dans `server/app/modules/item/itemActions.ts` :
+- Prevents retrying IDs that consistently fail
+- Retry system with counter
+- Automatic cleanup (10% chance per call)
 
-```typescript
-import type { RequestHandler } from "express";
+## Development Methodology
 
-import itemRepository from "./itemRepository";
+### Agile/Scrum
 
-const browse: RequestHandler = async (req, res, next) => {
-  try {
-    const items = await itemRepository.readAll();
+- **Sprints**: 1 week
+- **Daily Standups**: Daily synchronization
+- **Retrospectives**: Continuous improvement
+- **Pull Requests**: 50+ PR over 1 month
+- **Code Reviews**: Peer validation
 
-    res.json(items);
-  } catch (err) {
-    next(err);
-  }
-};
+### Best Practices
 
-export default { browse };
-```
+- **Git Flow**: Feature branches + PR
+- **Conventional Commits**: Standardized messages
+- **TypeScript Strict**: Maximum type safety
+- **Biome**: Automated code quality
+- **React Best Practices**: Hooks, memo, lazy loading
 
-**Accéder aux données** dans `server/app/modules/item/itemRepository.ts` :
+## Technical Optimizations Implemented
 
-```typescript
-import databaseClient from "../../../database/client";
+### Performance
 
-import type { Result, Rows } from "../../../database/client";
+1. **Batch Loading**: Loading in batches of 5 artworks
+2. **Progressive UI**: Progressive display with progress bar
+3. **Debouncing**: Optimized search (300ms)
+4. **React.memo**: Prevents unnecessary re-renders
+5. **Lazy Loading**: Images loaded on demand
+6. **Cache System**: Dual cache (valid/invalid)
 
-interface Item {
-  id: number;
-  title: string;
-  user_id: number;
-}
+### UX/UI
 
-class ItemRepository {
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>("select * from item");
+1. **Loading States**: Animated loaders + real-time counters
+2. **Error Handling**: Clear and actionable messages
+3. **Empty States**: Guides the user
+4. **Animations**: Progressive card fade-in
+5. **Responsive**: Adaptive mobile/tablet/desktop
 
-    return rows as Item[];
-  }
-}
+### Bug Fixes
 
-export default new ItemRepository();
-```
+1. **Infinite Loop**: Dependency stabilization with `useMemo`
+2. **403 Errors**: Batching + delays system
+3. **Cache Issues**: Smart expiration and retry
+4. **Mobile Layout**: Uniform cards on mobile
 
-**Ajouter un middleware** 
+## Design System
 
-```typescript
-// ...
+### Colors
 
-/* ************************************************************************* */
-// Define Your API Routes Here
-/* ************************************************************************* */
+- **Primary**: `#ffcd29` (Yellow)
+- **Secondary**: `#2997fd` (Blue)
+- **Background**: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
+- **Text**: `#000` (Black)
+- **Cards**: `#cbcbcb` (Light gray)
 
-// Define item-related routes
-import itemActions from "./modules/item/itemActions";
+### Neo-Brutalist Style
 
-const foo: RequestHandler = (req, res, next) => {
-  req.message = "hello middleware";
+- Thick black borders (3px)
+- No border-radius
+- Offset box-shadows
+- Uppercase typography with letterspacing
+- Hover effects with transform
 
-  next();
-}
+## Team
 
-router.get("/api/items", foo, itemActions.browse);
+**Collaborative project developed by a team of 3 developers**, with significant contributions to:
 
-/* ************************************************************************* */
+- Frontend architecture and component design
+- API integration and performance optimization
+- State management and caching system
+- Responsive design implementation
+- Code quality and testing
 
-// ...
-```
+**Duration**: 1 month (Agile Sprint)  
+**Pull Requests**: 50+  
+**Methodology**: Scrum
 
-`req.message` sera disponible dans `itemActions.browse`.
+[Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
 
-⚠️ La propriété `message` doit être ajoutée dans `src/types/express/index.d.ts` :
+Your feedback matters - don't hesitate to share your thoughts or suggestions!  
+📩 Contact: [LinkedIn](https://www.linkedin.com/in/nadir-ammisaid/)
 
-```diff
-// to make the file a module and avoid the TypeScript error
-export type {};
+## Contribution
 
-declare global {
-  namespace Express {
-    export interface Request {
-      /* ************************************************************************* */
-      // Add your custom properties here, for example:
-      //
-      // user?: { ... };
-      /* ************************************************************************* */
-+      message: string;
-    }
-  }
-}
-```
+To contribute to the project:
 
-### REST
+1. **Fork** the repository
+2. **Clone** your fork to your local machine
+3. Create a new branch (`git switch -c feature/my-feature`)
+4. **Commit** your changes (`git commit -m 'feat: add feature X'`)
+5. **Push** to your branch (`git push origin feature/my-feature`)
+6. Create a **Pull Request**
 
-| Opération | Méthode | Chemin d'URL | Corps de la requête | SQL    | Réponse (Succès)               | Réponse (Erreur)                                                       |
-|-----------|---------|--------------|---------------------|--------|--------------------------------|------------------------------------------------------------------------|
-| Browse    | GET     | /items       |                     | SELECT | 200 (OK), liste des items.     |                                                                        |
-| Read      | GET     | /items/:id   |                     | SELECT | 200 (OK), un item.             | 404 (Not Found), si id invalide.                                       |
-| Add       | POST    | /items       | Données de l'item   | INSERT | 201 (Created), id d'insertion. | 400 (Bad Request), si corps invalide.                                  |
-| Edit      | PUT     | /items/:id   | Données de l'item   | UPDATE | 204 (No Content).              | 400 (Bad Request), si corps invalide. 404 (Not Found), si id invalide. |
-| Destroy   | DELETE  | /items/:id   |                     | DELETE | 204 (No Content).              | 404 (Not Found), si id invalide.                                       |
+**Best practices**:
 
-### Autres Bonnes Pratiques
+- Run `npm run check` before pushing
+- Follow commit conventions
+- Add tests if necessary
+- Document new features
 
-- **Sécurité** :
-  - Validez et échappez toujours les entrées des utilisateurs.
-  - Utilisez HTTPS pour toutes les communications réseau.
-  - Stockez les mots de passe de manière sécurisée en utilisant des hash forts (ex : argon2).
-  - Revoyez et mettez à jour régulièrement les dépendances.
+## License
 
-- **Code** :
-  - Suivez les principes SOLID pour une architecture de code propre et maintenable.
-  - Utilisez TypeScript pour bénéficier de la vérification statique des types.
-  - Adoptez un style de codage cohérent avec Biome.
-  - Écrivez des tests pour toutes les fonctionnalités critiques.
-
-## FAQ
-
-### Déploiement avec Traefik
-
-> ⚠️ Prérequis : Vous devez avoir installé et configuré Traefik sur votre VPS au préalable. Suivez les instructions ici : [VPS Traefik Starter Kit](https://github.com/WildCodeSchool/vps-traefik-starter-kit/).
-
-Pour le déploiement, ajoutez les secrets suivants dans la section `secrets` → `actions` du dépôt GitHub :
-
-- `SSH_HOST` : Adresse IP de votre VPS
-- `SSH_USER` : Identifiant SSH pour votre VPS
-- `SSH_PASSWORD` : Mot de passe de connexion SSH pour votre VPS
-
-Et une variable publique dans `/settings/variables/actions` :
-
-- `PROJECT_NAME` : Le nom du projet utilisé pour créer le sous-domaine.
-
-> ⚠️ Avertissement : Les underscores ne sont pas autorisés car ils peuvent causer des problèmes avec le certificat Let's Encrypt.
-
-L'URL de votre projet sera `https://${PROJECT-NAME}.${subdomain}.wilders.dev/`.
-
-### Variables d'environnement spécifiques
-
-Les étudiants doivent utiliser le modèle fourni dans le fichier `*.env.sample*` en suivant la convention `<PROJECT_NAME><SPECIFIC_NAME>=<THE_VARIABLE>`.
-
-> ⚠️ **Avertissement:** Le `PROJECT_NAME` doit correspondre à celui utilisé dans la variable publique Git.
-
-Pour l'ajouter lors du déploiement, suivez ces deux étapes :
-
-1. Ajoutez la variable correspondante dans le fichier `docker-compose.prod.yml` (comme montré dans l'exemple : `PROJECT_NAME_SPECIFIC_NAME: ${PROJECT_NAME_SPECIFIC_NAME}`).
-2. Connectez-vous à votre serveur via SSH. Ouvrez le fichier `.env` global dans Traefik (`nano ./traefik/data/.env`). Ajoutez la variable avec la valeur correcte et sauvegardez le fichier.
-
-Après cela, vous pouvez lancer le déploiement automatique. Docker ne sera pas rafraîchi pendant ce processus.
-
-### Logs
-
-Pour accéder aux logs de votre projet en ligne (pour suivre le déploiement ou surveiller les erreurs), connectez-vous à votre VPS (`ssh user@host`). Ensuite, allez dans votre projet spécifique et exécutez `docker compose logs -t -f`.
-
-### Contribution
-
-Nous accueillons avec plaisir les contributions ! Veuillez suivre ces étapes pour contribuer :
-
-1. **Fork** le dépôt.
-2. **Clone** votre fork sur votre machine locale.
-3. Créez une nouvelle branche pour votre fonctionnalité ou bug fix (`git switch -c feature/your-feature-name`).
-4. **Commit** vos modifications (`git commit -m 'Add some feature'`).
-5. **Push** vers votre branche (`git push origin feature/your-feature-name`).
-6. Créez une **Pull Request** sur le dépôt principal.
-
-**Guide de Contribution** :
-
-- Assurez-vous que votre code respecte les standards de codage en exécutant `npm run check` avant de pousser vos modifications.
-- Ajoutez des tests pour toute nouvelle fonctionnalité ou correction de bug.
-- Documentez clairement vos modifications dans la description de la pull request.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
