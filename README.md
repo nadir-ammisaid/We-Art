@@ -286,7 +286,7 @@ Par [Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
 
 Vos avis m'intéressent - n'hésitez pas à me faire part de vos retours ou suggestions !  
 📩 Contact : [LinkedIn.com/in/Nadir-AmmiSaid](https://www.linkedin.com/in/nadir-ammisaid/)  
-🌐 Portfolio : [portfolio-nad.vercel.app](https://www.portfolio-nad.vercel.app/)
+🌐 Portfolio : [www.portfolio-nad.vercel.app](https://portfolio-nad.vercel.app/)
 
 ## Contribution
 
@@ -593,7 +593,7 @@ By [Nadir AMMI SAID](https://www.linkedin.com/in/nadir-ammisaid/)
 
 Your feedback matters - don't hesitate to share your thoughts or suggestions!  
 📩 Contact: [LinkedIn.com/in/Nadir-AmmiSaid](https://www.linkedin.com/in/nadir-ammisaid/)  
-🌐 Portfolio : [portfolio-nad.vercel.app](https://portfolio-nad.vercel.app/)
+🌐 Portfolio : [www.portfolio-nad.vercel.app](https://portfolio-nad.vercel.app/)
 
 ## Contribution
 
